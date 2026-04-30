@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পরীক্ষার প্রশ্নপত্র নির্মাতা</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'SolaimanLipi';
+  src: url('https://fonts.maateen.me/solaiman-lipi/SolaimanLipi.woff2') format('woff2'),
+       url('https://fonts.maateen.me/solaiman-lipi/SolaimanLipi.woff') format('woff');
+  font-weight: normal;
+}
+@font-face {
+  font-family: 'SolaimanLipi';
+  src: url('https://fonts.maateen.me/solaiman-lipi/SolaimanLipi_Bold.woff2') format('woff2'),
+       url('https://fonts.maateen.me/solaiman-lipi/SolaimanLipi_Bold.woff') format('woff');
+  font-weight: bold;
+}
+</style>
+
+<!-- KaTeX loaded SYNCHRONOUSLY — must be ready before any JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+:root {
+  --primary:       #1a6b3c;
+  --primary-dark:  #0f4a29;
+  --primary-light: #e8f5ee;
+  --accent:        #f0a500;
+  --bg:            #f0f3f8;
+  --card:          #ffffff;
+  --border:        #d1dce8;
+  --text:          #1e2b3a;
+  --muted:         #6b7a8d;
+  --danger:        #dc3545;
+  --radius:        12px;
+  --shadow:        0 2px 12px rgba(0,0,0,.08);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,.14);
+  --bangla:        'SolaimanLipi','Noto Sans Bengali',sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--bangla); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--primary-dark); color: #fff; height: 58px;
+  padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 200; box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+.topbar-brand { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 9px; }
+.topbar-actions { display: flex; gap: 8px; }
+
+/* TABS */
+.tab-bar { background: #fff; border-bottom: 2px solid var(--border); display: flex; padding: 0 24px; }
+.tab-btn {
+  padding: 13px 22px; border: none; background: none; cursor: pointer;
+  font-family: var(--bangla); font-size: .93rem; color: var(--muted);
+  border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; font-weight: 500;
+}
+.tab-btn:hover { color: var(--primary); }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: 8px; border: none; cursor: pointer; font-family: var(--bangla);
+  font-size: .86rem; font-weight: 600; transition: all .18s; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-accent  { background: var(--accent); color: #fff; }
+.btn-accent:hover  { background: #d4900e; }
+.btn-danger  { background: var(--danger); color: #fff; }
+.btn-danger:hover  { background: #b52a38; }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary-light); }
+.btn-ghost   { background: var(--bg); color: var(--text); }
+.btn-ghost:hover   { background: var(--border); }
+.btn-sm { padding: 5px 11px; font-size: .78rem; }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* EDITOR LAYOUT */
+.editor-layout {
+  display: grid; grid-template-columns: 370px 1fr;
+  gap: 22px; padding: 22px; max-width: 1600px; margin: 0 auto;
+}
+@media (max-width: 1100px) { .editor-layout { grid-template-columns: 1fr; } }
+
+/* CARDS */
+.card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+.card-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff; padding: 13px 18px; font-weight: 700; font-size: .97rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 18px; }
+
+/* FORMS */
+.form-group { margin-bottom: 13px; }
+.form-label { display: block; font-size: .78rem; font-weight: 700; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+.form-control {
+  width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: var(--bangla); font-size: .92rem; color: var(--text); background: #fff; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,107,60,.12); }
+textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
+.form-row   { display: grid; grid-template-columns: 1fr 1fr;     gap: 11px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* ── COLUMN LAYOUT SELECTOR ── */
+.col-selector { display: flex; gap: 8px; margin-top: 4px; }
+.col-opt {
+  flex: 1; border: 2.5px solid var(--border); border-radius: 10px;
+  padding: 10px 6px 8px; cursor: pointer; text-align: center;
+  transition: all .18s; background: #fff; user-select: none;
+}
+.col-opt:hover { border-color: var(--primary); background: var(--primary-light); }
+.col-opt.active { border-color: var(--primary); background: var(--primary-light); }
+.col-icon { display: flex; gap: 3px; justify-content: center; margin-bottom: 6px; height: 32px; align-items: flex-end; }
+.col-bar  { background: var(--primary); border-radius: 3px; opacity: .35; width: 11px; height: 100%; }
+.col-opt.active .col-bar { opacity: 1; }
+.col-opt span { font-size: .73rem; font-weight: 700; color: var(--muted); }
+.col-opt.active span { color: var(--primary); }
+
+/* QUESTION EDITOR CARDS */
+.questions-panel { display: flex; flex-direction: column; gap: 15px; }
+.question-card {
+  background: var(--card); border-radius: var(--radius);
+  border: 1.5px solid var(--border); box-shadow: var(--shadow);
+  overflow: hidden; transition: box-shadow .2s;
+  animation: fadeIn .22s ease;
+}
+.question-card:hover { box-shadow: var(--shadow-lg); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.question-card-header {
+  background: linear-gradient(135deg, #1a6b3c, #0f4a29);
+  color: #fff; padding: 11px 16px; display: flex; align-items: center; gap: 11px;
+}
+.q-num {
+  background: rgba(255,255,255,.25); width: 32px; height: 32px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .95rem; flex-shrink: 0;
+}
+.q-title-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: var(--bangla); font-size: .93rem; color: #fff; font-weight: 600;
+}
+.q-title-input::placeholder { color: rgba(255,255,255,.55); }
+.badge {
+  padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+  background: rgba(255,255,255,.22); color: #fff; white-space: nowrap;
+}
+.question-card-body { padding: 16px; }
+.context-area { margin-bottom: 14px; }
+.sub-questions { display: flex; flex-direction: column; gap: 9px; }
+.sub-q-row {
+  display: grid; grid-template-columns: 32px 1fr 62px 30px;
+  gap: 8px; align-items: flex-start;
+  padding: 10px; background: var(--bg);
+  border-radius: 8px; border: 1px solid var(--border);
+}
+.sub-q-label {
+  width: 32px; height: 32px; background: var(--primary); color: #fff;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .88rem; flex-shrink: 0; margin-top: 2px;
+}
+.sub-q-row textarea { resize: vertical; min-height: 48px; font-size: .86rem; line-height: 1.6; }
+.marks-input {
+  width: 100%; padding: 6px 6px; text-align: center;
+  border: 1.5px solid var(--border); border-radius: 7px;
+  font-family: var(--bangla); font-size: .86rem; outline: none; background: #fff;
+}
+.marks-input:focus { border-color: var(--primary); }
+.q-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border);
+}
+.add-sub-q-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 13px;
+  border: 1.5px dashed var(--primary); border-radius: 7px;
+  background: var(--primary-light); color: var(--primary);
+  font-family: var(--bangla); font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.add-sub-q-btn:hover { background: #cfe8d8; }
+.math-hint {
+  font-size: .72rem; color: var(--muted); background: #fffdf0;
+  border: 1px solid #e8d870; border-radius: 6px; padding: 6px 10px; margin-bottom: 7px; line-height: 1.7;
+}
+.math-hint code { background: #f0e88a; padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: .85em; color: #5a4500; }
+.add-question-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 15px; border: 2.5px dashed var(--primary); border-radius: var(--radius);
+  background: var(--primary-light); color: var(--primary);
+  font-family: var(--bangla); font-size: .97rem; font-weight: 700; cursor: pointer; transition: all .2s; margin-top: 14px;
+}
+.add-question-btn:hover { background: #cfe8d8; border-color: var(--primary-dark); }
+.total-marks-display {
+  background: var(--primary-light); border: 2px solid var(--primary);
+  border-radius: 9px; padding: 10px 15px;
+  display: flex; justify-content: space-between;
+  font-weight: 700; color: var(--primary-dark); margin-top: 14px; font-size: .95rem;
+}
+.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+.empty-state .big { font-size: 3.5rem; }
+
+/* PREVIEW */
+#preview-panel { padding: 22px; }
+.preview-btn-bar { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+.preview-wrap { background: #fff; max-width: 840px; margin: 0 auto; box-shadow: 0 4px 40px rgba(0,0,0,.15); border-radius: 4px; }
+
+/* ══ EXAM PAPER STYLES ══ */
+.exam-paper { font-family: var(--bangla); padding: 22px 30px; color: #111; font-size: 13px; line-height: 1.7; }
+.ep-top-banner {
+  background: linear-gradient(135deg,#1a6b3c,#0f4a29); color: #fff;
+  text-align: center; padding: 10px 18px; margin: -22px -30px 16px -30px;
+}
+.ep-top-banner h1 { font-size: 1.05rem; font-weight: 700; }
+.ep-sub-header { text-align: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #1a6b3c; }
+.ep-org   { font-size: .9rem; font-weight: 700; color: #1a6b3c; }
+.ep-title { font-size: 1.3rem; font-weight: 700; }
+.ep-chapter { font-size: .82rem; color: #444; margin-top: 1px; }
+.ep-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: .83rem; margin-top: 6px; }
+.ep-code-wrap { display: flex; align-items: center; gap: 4px; font-weight: 600; }
+.ep-code-box { border: 2px solid #111; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .95rem; }
+.ep-instructions { font-size: .78rem; color: #444; text-align: center; margin: 6px 0; font-style: italic; }
+.ep-pass-box { background: #f0f9f4; border: 1.5px solid #1a6b3c; border-radius: 5px; padding: 5px 14px; font-size: .82rem; font-weight: 700; color: #1a6b3c; text-align: center; margin: 7px 0; }
+
+/* ── COLUMN CLASSES (applied to .ep-questions) ── */
+.ep-questions { margin-top: 10px; }
+.ep-questions.col-1 { column-count: 1; }
+.ep-questions.col-2 { column-count: 2; column-gap: 20px; }
+.ep-questions.col-3 { column-count: 3; column-gap: 14px; }
+
+.ep-question { break-inside: avoid; margin-bottom: 14px; }
+.ep-q-row    { display: flex; gap: 7px; align-items: flex-start; }
+.ep-q-num    { font-weight: 700; font-size: .86rem; white-space: nowrap; min-width: 24px; }
+.ep-q-body   { flex: 1; }
+.ep-q-title  { font-weight: 700; font-size: .86rem; margin-bottom: 3px; }
+.ep-context  { font-size: .83rem; text-align: justify; margin-bottom: 6px; }
+.ep-sub-list { list-style: none; padding: 0; }
+.ep-sub-item { display: flex; gap: 6px; font-size: .82rem; line-height: 1.75; margin-bottom: 2px; }
+.ep-sub-lbl  { font-weight: 700; min-width: 20px; flex-shrink: 0; }
+.ep-sub-txt  { flex: 1; text-align: justify; }
+.ep-sub-mk   { font-weight: 700; min-width: 18px; text-align: right; flex-shrink: 0; }
+
+.ep-bottom-banner {
+  background: linear-gradient(135deg,#1a6b3c,#0f4a29); color: #fff;
+  text-align: center; padding: 9px; margin: 14px -30px -22px -30px;
+  font-weight: 600; font-size: .85rem;
+}
+
+/* PRINT */
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; box-shadow: none !important; border-radius: 0 !important; }
+  .ep-top-banner    { margin: -12mm -14mm 14px -14mm !important; border-radius: 0 !important; }
+  .ep-bottom-banner { margin: 14px -14mm -12mm -14mm !important; border-radius: 0 !important; }
+  .preview-btn-bar  { display: none !important; }
+}
+
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
+.tab-content { display: none; } .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-brand">📝 পরীক্ষার প্রশ্নপত্র নির্মাতা</div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="switchTab('preview')">👁️ প্রিভিউ</button>
+    <button class="btn btn-accent btn-sm" onclick="printExam()">🖨️ প্রিন্ট (A4)</button>
+  </div>
+</nav>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-editor"  onclick="switchTab('editor')">✏️ সম্পাদক</button>
+  <button class="tab-btn"        id="tab-preview" onclick="switchTab('preview')">👁️ প্রিভিউ</button>
+</div>
+
+<!-- ═══ EDITOR ═══ -->
+<div id="editor-tab" class="tab-content active">
+<div class="editor-layout">
+
+  <!-- LEFT PANEL -->
+  <div>
+    <div class="card">
+      <div class="card-header">📋 পরীক্ষার তথ্য</div>
+      <div class="card-body">
+
+        <div class="form-group">
+          <label class="form-label">শ্রেণিকক্ষ / প্রতিষ্ঠানের নাম</label>
+          <input id="classroom-name" class="form-control" value="Mahin's Classroom">
+        </div>
+        <div class="form-group">
+          <label class="form-label">পরীক্ষার শিরোনাম</label>
+          <input id="exam-title" class="form-control" value="বৃষ্টির পরিক্ষা">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">অধ্যায়</label>
+            <input id="chapter" class="form-control" value="অধ্যায় ২">
+          </div>
+          <div class="form-group">
+            <label class="form-label">অধ্যায়ের নাম</label>
+            <input id="chapter-name" class="form-control" value="ভেক্টর">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">বিষয় কোড (প্রতিটি ঘরে ১টি অঙ্ক)</label>
+          <div class="form-row-3">
+            <input id="code1" class="form-control" maxlength="1" value="১" style="text-align:center;font-weight:700;font-size:1.1rem;">
+            <input id="code2" class="form-control" maxlength="1" value="৭" style="text-align:center;font-weight:700;font-size:1.1rem;">
+            <input id="code3" class="form-control" maxlength="1" value="৪" style="text-align:center;font-weight:700;font-size:1.1rem;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">সময়</label>
+            <input id="exam-time" class="form-control" value="২ ঘন্টা ৩০ মিনিট">
+          </div>
+          <div class="form-group">
+            <label class="form-label">পূর্ণমান</label>
+            <input id="total-marks" type="number" class="form-control" value="50">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">নির্দেশনা</label>
+          <textarea id="instructions" class="form-control">ডান পাশের সংখ্যা প্রশ্নের পূর্ণমান জ্ঞাপক। ৫টি প্রশ্নের উত্তর দিবা।</textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">পাস মার্ক</label>
+            <input id="pass-mark" type="number" class="form-control" value="17">
+          </div>
+          <div class="form-group">
+            <label class="form-label">টার্গেট মার্ক</label>
+            <input id="target-mark" class="form-control" value="৩৫+">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">উপরের ব্যানার বার্তা</label>
+          <input id="banner-msg" class="form-control" value="ভালো ভাবে এক্সাম দিবা মইনা 🥺">
+        </div>
+        <div class="form-group">
+          <label class="form-label">নিচের ব্যানার বার্তা</label>
+          <input id="footer-msg" class="form-control" value="পাস করলে চকলেট কিনে দিবো">
+        </div>
+
+        <!-- ── COLUMN SELECTOR ── -->
+        <div class="form-group" style="margin-top:18px;">
+          <label class="form-label">প্রশ্নের কলাম অ্যালাইনমেন্ট</label>
+          <div class="col-selector">
+
+            <div class="col-opt" id="col-opt-1" onclick="setColumns(1)">
+              <div class="col-icon">
+                <div class="col-bar" style="width:22px;"></div>
+              </div>
+              <span>১ কলাম</span>
+            </div>
+
+            <div class="col-opt active" id="col-opt-2" onclick="setColumns(2)">
+              <div class="col-icon">
+                <div class="col-bar"></div>
+                <div class="col-bar"></div>
+              </div>
+              <span>২ কলাম</span>
+            </div>
+
+            <div class="col-opt" id="col-opt-3" onclick="setColumns(3)">
+              <div class="col-icon">
+                <div class="col-bar" style="width:8px;"></div>
+                <div class="col-bar" style="width:8px;"></div>
+                <div class="col-bar" style="width:8px;"></div>
+              </div>
+              <span>৩ কলাম</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="total-marks-display">
+          <span>প্রশ্নের মোট মার্ক:</span>
+          <span id="calc-marks">০</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Math reference -->
+    <div class="card" style="margin-top:14px;">
+      <div class="card-header">🔢 গাণিতিক সংকেত রেফারেন্স</div>
+      <div class="card-body" style="font-size:.8rem;line-height:2.1;">
+        <div class="math-hint" style="margin-bottom:10px;">
+          ইনলাইন গণিত: <code>$সূত্র$</code> &nbsp;|&nbsp; বড় সূত্র: <code>$$সূত্র$$</code>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;color:var(--muted);">
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\vec{A}</code> → ভেক্টর</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\hat{i}</code> → একক ভেক্টর</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\frac{a}{b}</code> → ভগ্নাংশ</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\sqrt{x}</code> → বর্গমূল</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\times</code> → ×</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\theta</code> → θ</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\alpha</code> → α</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">^{-1}</code> → ⁻¹</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\pm</code> → ±</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\infty</code> → ∞</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\degree</code> → °</span>
+          <span><code style="background:#eee;padding:1px 4px;border-radius:3px;">\cdot</code> → ·</span>
+        </div>
+        <div style="margin-top:9px;background:#f0f4ff;padding:8px 10px;border-radius:7px;font-size:.75rem;color:#3a4a8a;">
+          <b>লাইভ উদাহরণ:</b> $\hat{i} \times \hat{i} = 0$
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: QUESTIONS -->
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="font-size:1.15rem;font-weight:700;color:var(--primary-dark);">📚 সৃজনশীল প্রশ্নসমূহ</h2>
+      <button class="btn btn-ghost btn-sm" onclick="clearAllQs()">🗑️ সব মুছুন</button>
+    </div>
+    <div class="questions-panel" id="qcontainer"></div>
+    <button class="add-question-btn" onclick="addQuestion()">
+      <span style="font-size:1.4rem;line-height:1;">＋</span> নতুন প্রশ্ন যোগ করুন
+    </button>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══ PREVIEW ═══ -->
+<div id="preview-tab" class="tab-content">
+  <div id="preview-panel">
+    <div class="preview-btn-bar">
+      <button class="btn btn-primary" onclick="refreshPreview()">🔄 আপডেট</button>
+      <button class="btn btn-accent"  onclick="printExam()">🖨️ প্রিন্ট (A4)</button>
+      <button class="btn btn-ghost"   onclick="switchTab('editor')">✏️ সম্পাদকে ফিরুন</button>
+    </div>
+    <div class="preview-wrap" id="print-area">
+      <div class="exam-paper" id="preview-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════ STATE ════════════════ */
+let questions = [];
+let nextId    = 1;
+let colCount  = 2;
+
+const LABELS = ['ক','খ','গ','ঘ'];
+const DEF_MK = [1,2,3,4];
+
+/* ════════════════ UTILS ════════════════ */
+function toBn(n){ return String(n).replace(/[0-9]/g,d=>'০১২৩৪৫৬৭৮৯'[d]); }
+
+/* Safe KaTeX render — works on dynamically inserted content */
+function renderMath(el) {
+  if (!el || typeof renderMathInElement !== 'function') return;
+  try {
+    renderMathInElement(el, {
+      delimiters: [
+        { left:'$$', right:'$$', display:true  },
+        { left:'$',  right:'$',  display:false }
+      ],
+      throwOnError: false,
+      strict: false
+    });
+  } catch(e){}
+}
+
+/* ════════════════ TABS ════════════════ */
+function switchTab(t) {
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById(t+'-tab').classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='preview') refreshPreview();
+}
+
+/* ════════════════ COLUMN SELECT ════════════════ */
+function setColumns(n) {
+  colCount = n;
+  [1,2,3].forEach(i => document.getElementById('col-opt-'+i).classList.toggle('active', i===n));
+}
+
+/* ════════════════ GATHER LIVE TEXTAREA VALUES ════════════════ */
+function gather() {
+  questions.forEach(q => {
+    const card = document.getElementById('qcard-'+q.id); if(!card) return;
+    const ctx = card.querySelector('.ctx-ta');
+    if(ctx) q.context = ctx.value;
+    const ttl = card.querySelector('.q-title-input');
+    if(ttl) q.title = ttl.value;
+    card.querySelectorAll('.sub-row').forEach((row,si)=>{
+      if(!q.subQuestions[si]) return;
+      const ta = row.querySelector('textarea');
+      const mk = row.querySelector('.marks-input');
+      if(ta) q.subQuestions[si].text  = ta.value;
+      if(mk) q.subQuestions[si].marks = parseInt(mk.value)||0;
+    });
+  });
+}
+
+/* ════════════════ ADD QUESTION ════════════════ */
+function addQuestion(data) {
+  const id = nextId++;
+  questions.push(data ? {...data, id} : {
+    id, title:'', context:'',
+    subQuestions: [{text:'',marks:1},{text:'',marks:2},{text:'',marks:3},{text:'',marks:4}]
+  });
+  renderQs();
+  setTimeout(()=>document.getElementById('qcard-'+(nextId-1))?.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+
+/* ════════════════ RENDER QUESTION CARDS ════════════════ */
+function qMark(q){ return q.subQuestions.reduce((s,sq)=>s+(parseInt(sq.marks)||0),0); }
+
+function renderQs() {
+  const c = document.getElementById('qcontainer');
+  if(!questions.length){
+    c.innerHTML=`<div class="empty-state"><div class="big">📭</div><h3 style="margin:10px 0 6px;">কোনো প্রশ্ন নেই</h3><p>নিচের বোতামে ক্লিক করুন</p></div>`;
+    updateTotal(); return;
+  }
+  c.innerHTML='';
+  questions.forEach((q,idx)=>{
+    const el = document.createElement('div');
+    el.className='question-card'; el.id='qcard-'+q.id;
+    el.innerHTML=`
+      <div class="question-card-header">
+        <div class="q-num">${toBn(idx+1)}</div>
+        <input class="q-title-input" placeholder="প্রশ্নের শিরোনাম (ঐচ্ছিক)"
+          value="${(q.title||'').replace(/"/g,'&quot;')}"
+          oninput="onQChange(${q.id},'title',this.value)">
+        <span class="badge" id="bdg-${q.id}">${qMark(q)} মার্ক</span>
+      </div>
+      <div class="question-card-body">
+        <div class="context-area">
+          <div class="math-hint">💡 গণিতের জন্য ইনলাইন <code>$…$</code> বা বড় সূত্র <code>$$…$$</code></div>
+          <label class="form-label">প্রশ্নের প্রেক্ষাপট / উদ্দীপক</label>
+          <textarea class="form-control ctx-ta" rows="3"
+            placeholder="প্রেক্ষাপট লিখুন… যেমন: নদীতে স্রোতের বেগ $5\\ kmh^{-1}$"
+            oninput="onQChange(${q.id},'context',this.value)">${escHTML(q.context)}</textarea>
+        </div>
+        <label class="form-label" style="margin-bottom:7px;">উপ-প্রশ্নসমূহ</label>
+        <div class="sub-questions" id="sqs-${q.id}">
+          ${q.subQuestions.map((sq,si)=>subRowHTML(q.id,si,sq)).join('')}
+        </div>
+        <div class="q-actions">
+          <div>
+            ${q.subQuestions.length<4
+              ? `<button class="add-sub-q-btn" onclick="addSubQ(${q.id})">+ উপ-প্রশ্ন</button>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="moveQ(${q.id},-1)" ${idx===0?'disabled':''}>↑</button>
+            <button class="btn btn-ghost btn-sm" onclick="moveQ(${q.id}, 1)" ${idx===questions.length-1?'disabled':''}>↓</button>
+            <button class="btn btn-danger btn-sm" onclick="removeQ(${q.id})">🗑️ মুছুন</button>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(el);
+  });
+  updateTotal();
+}
+
+function escHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function subRowHTML(qid,si,sq){
+  return `<div class="sub-row" id="sr-${qid}-${si}" style="display:grid;grid-template-columns:32px 1fr 62px 30px;gap:8px;align-items:flex-start;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+    <div class="sub-q-label">${LABELS[si]||si+1}</div>
+    <textarea class="form-control" rows="2" style="resize:vertical;min-height:48px;font-size:.86rem;line-height:1.6;"
+      placeholder="প্রশ্ন লিখুন…"
+      oninput="onSqChange(${qid},${si},'text',this.value)">${escHTML(sq.text)}</textarea>
+    <input type="number" class="marks-input" value="${sq.marks}" min="0" max="99" title="মার্ক"
+      oninput="onSqChange(${qid},${si},'marks',this.value)">
+    <button class="btn btn-ghost btn-sm" style="color:var(--danger);padding:6px 7px;"
+      onclick="removeSubQ(${qid},${si})" title="মুছুন">✕</button>
+  </div>`;
+}
+
+/* ════════════════ MUTATIONS ════════════════ */
+function onQChange(qid,field,val){
+  const q=questions.find(q=>q.id===qid); if(q) q[field]=val;
+}
+function onSqChange(qid,si,field,val){
+  const q=questions.find(q=>q.id===qid); if(!q||!q.subQuestions[si]) return;
+  q.subQuestions[si][field]=field==='marks'?(parseInt(val)||0):val;
+  if(field==='marks'){updateTotal();const b=document.getElementById('bdg-'+qid);if(b)b.textContent=qMark(q)+' মার্ক';}
+}
+function addSubQ(qid){
+  const q=questions.find(q=>q.id===qid);
+  if(q&&q.subQuestions.length<4){ gather(); q.subQuestions.push({text:'',marks:DEF_MK[q.subQuestions.length]||0}); renderQs(); }
+}
+function removeSubQ(qid,si){
+  const q=questions.find(q=>q.id===qid);
+  if(q){ gather(); q.subQuestions.splice(si,1); renderQs(); }
+}
+function removeQ(id){
+  if(confirm('এই প্রশ্নটি মুছে ফেলবেন?')){ gather(); questions=questions.filter(q=>q.id!==id); renderQs(); }
+}
+function moveQ(id,dir){
+  gather();
+  const i=questions.findIndex(q=>q.id===id),ni=i+dir;
+  if(ni<0||ni>=questions.length)return;
+  [questions[i],questions[ni]]=[questions[ni],questions[i]]; renderQs();
+}
+function clearAllQs(){
+  if(confirm('সব প্রশ্ন মুছে ফেলবেন?')){ questions=[]; renderQs(); }
+}
+function updateTotal(){
+  const t=questions.reduce((s,q)=>s+qMark(q),0);
+  const el=document.getElementById('calc-marks'); if(el) el.textContent=toBn(t);
+}
+
+/* ════════════════ FORM VALUES ════════════════ */
+function gv(id){ return (document.getElementById(id)||{}).value||''; }
+
+/* ════════════════ PREVIEW BUILD ════════════════ */
+function buildHTML(){
+  gather();
+  const qHTML = questions.map((q,i)=>`
+    <div class="ep-question">
+      <div class="ep-q-row">
+        <span class="ep-q-num">${toBn(i+1)}.</span>
+        <div class="ep-q-body">
+          ${q.title?`<div class="ep-q-title">${q.title}</div>`:''}
+          <div class="ep-context">${q.context||''}</div>
+          <ul class="ep-sub-list">
+            ${q.subQuestions.map((sq,si)=>`
+              <li class="ep-sub-item">
+                <span class="ep-sub-lbl">(${LABELS[si]||si+1})</span>
+                <span class="ep-sub-txt">${sq.text||'—'}</span>
+                <span class="ep-sub-mk">${sq.marks||0}</span>
+              </li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const pm=gv('pass-mark'), tm=gv('target-mark');
+  const passBox=(pm||tm)
+    ? `<div class="ep-pass-box">পাস করলে চকলেট কিনে দিবো &nbsp;|&nbsp; টার্গেট মার্ক: ${tm} &nbsp;|&nbsp; পাস মার্ক: ${toBn(pm)}</div>`
+    : '';
+
+  return `
+    <div class="ep-top-banner"><h1>${gv('banner-msg')}</h1></div>
+    <div class="ep-sub-header">
+      <div class="ep-org">${gv('classroom-name')}</div>
+      <div class="ep-title">${gv('exam-title')}</div>
+      <div class="ep-chapter">${gv('chapter')} - ${gv('chapter-name')}</div>
+      <div class="ep-meta-row" style="margin-top:6px;">
+        <span>সময়— ${gv('exam-time')}</span>
+        <div class="ep-code-wrap">
+          বিষয় কোড :
+          <div class="ep-code-box">${gv('code1')}</div>
+          <div class="ep-code-box">${gv('code2')}</div>
+          <div class="ep-code-box">${gv('code3')}</div>
+        </div>
+      </div>
+      <div class="ep-meta-row" style="margin-top:4px;">
+        <span></span>
+        <span style="font-weight:700;">পূর্ণমান— ${toBn(gv('total-marks'))}</span>
+      </div>
+    </div>
+    <p class="ep-instructions">দ্রষ্টব্যঃ ${gv('instructions')}</p>
+    ${passBox}
+    <div class="ep-questions col-${colCount}" id="ep-qs">${qHTML}</div>
+    <div class="ep-bottom-banner">${gv('footer-msg')}</div>`;
+}
+
+function refreshPreview(){
+  const el=document.getElementById('preview-content');
+  el.innerHTML=buildHTML();
+  // KaTeX render after DOM settles
+  setTimeout(()=>renderMath(el), 50);
+}
+
+function printExam(){
+  refreshPreview(); switchTab('preview');
+  setTimeout(()=>window.print(), 700);
+}
+
+/* ════════════════ SAMPLE DATA ════════════════ */
+function loadSample(){
+  questions=[]; nextId=1;
+
+  questions.push({id:nextId++,title:'',
+    context:'বৃষ্টির দিনে মাহিন দেখল বৃষ্টি $3\\ kmh^{-1}$ বেগে লম্বভাবে পড়ছিল। সে আরও দেখল যে তুবা $2\\ kmh^{-1}$ বেগে হাঁটছিল এবং বর্ষা $4\\ kmh^{-1}$ বেগে দৌড়াচ্ছিল। তারা দুই জনেই উলম্বের সাথে ছাতা ভিন্ন কোণে ধরেছিল।',
+    subQuestions:[
+      {text:'শূন্য ভেক্টর কী?',marks:1},
+      {text:'$\\hat{i} \\times \\hat{i} = 0$ হয় কেন? ব্যাখ্যা কর।',marks:2},
+      {text:'তুবার সাপেক্ষে বৃষ্টির লব্ধি বেগ নির্ণয় কর।',marks:3},
+      {text:'তুবা এবং বর্ষার ছাতা ধরার কোণ কি একই? গাণিতিকভাবে ব্যাখ্যা দাও।',marks:4}
+    ]});
+
+  questions.push({id:nextId++,title:'',
+    context:'$10\\ km$ প্রস্থবিশিষ্ট একটি নদীতে স্রোতের বেগ $5\\ kmh^{-1}$। একজন মাঝি $10\\ kmh^{-1}$ বেগে স্রোতের সাথে $110°$ কোণে নদী পার হতে যাত্রা করল।',
+    subQuestions:[
+      {text:'একক ভেক্টর কাকে বলে?',marks:1},
+      {text:'লন রোলার টানা ও ঠেলার সুবিধা অসুবিধা ভেক্টর বিভাজনের সাহায্যে ব্যাখ্যা কর।',marks:2},
+      {text:'উদ্দীপকের মাঝির নদী পারাপারের সময় নির্ণয় কর।',marks:3},
+      {text:'সোজাসুজি অপর তীরে পৌঁছাতে মাঝি কী কী ব্যবস্থা গ্রহণ করতে পারে? গাণিতিক বিশ্লেষণ দাও।',marks:4}
+    ]});
+
+  questions.push({id:nextId++,title:'',
+    context:'ত্রিভুজের ৩টি শীর্ষবিন্দুর স্থানাঙ্ক $A(1,3,2)$, $B(2,-1,1)$ এবং $C(-1,2,3)$।',
+    subQuestions:[
+      {text:'কার্লের সংজ্ঞা দাও।',marks:1},
+      {text:'ঘর্ষণ বল অসংরক্ষণশীল বল — ব্যাখ্যা কর।',marks:2},
+      {text:'উদ্দীপকের ত্রিভুজের ক্ষেত্রফল নির্ণয় কর।',marks:3},
+      {text:'উপরের ৩টি ভেক্টর কি একই তলে? গাণিতিক বিশ্লেষণ দাও।',marks:4}
+    ]});
+
+  renderQs();
+}
+
+/* ════════════════ INIT ════════════════ */
+window.addEventListener('DOMContentLoaded', ()=>{
+  loadSample();
+  // Render math in the reference card's live example
+  setTimeout(()=>renderMath(document.querySelector('.card-body')), 300);
+  document.addEventListener('input', updateTotal);
+});
+</script>
+</body>
+</html>
