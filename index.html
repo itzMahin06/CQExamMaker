@@ -23,7 +23,6 @@
 }
 </style>
 
-<!-- KaTeX loaded SYNCHRONOUSLY — must be ready before any JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
@@ -274,7 +273,6 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
 </head>
 <body>
 
-<!-- TOPBAR -->
 <nav class="topbar">
   <div class="topbar-brand">📝 পরীক্ষার প্রশ্নপত্র নির্মাতা</div>
   <div class="topbar-actions">
@@ -283,17 +281,14 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
   </div>
 </nav>
 
-<!-- TAB BAR -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-editor"  onclick="switchTab('editor')">✏️ সম্পাদক</button>
   <button class="tab-btn"        id="tab-preview" onclick="switchTab('preview')">👁️ প্রিভিউ</button>
 </div>
 
-<!-- ═══ EDITOR ═══ -->
 <div id="editor-tab" class="tab-content active">
 <div class="editor-layout">
 
-  <!-- LEFT PANEL -->
   <div>
     <div class="card">
       <div class="card-header">📋 পরীক্ষার তথ্য</div>
@@ -358,7 +353,6 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
           <input id="footer-msg" class="form-control" value="পাস করলে চকলেট কিনে দিবো">
         </div>
 
-        <!-- ── COLUMN SELECTOR ── -->
         <div class="form-group" style="margin-top:18px;">
           <label class="form-label">প্রশ্নের কলাম অ্যালাইনমেন্ট</label>
           <div class="col-selector">
@@ -397,7 +391,6 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
       </div>
     </div>
 
-    <!-- Math reference -->
     <div class="card" style="margin-top:14px;">
       <div class="card-header">🔢 গাণিতিক সংকেত রেফারেন্স</div>
       <div class="card-body" style="font-size:.8rem;line-height:2.1;">
@@ -425,7 +418,6 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
     </div>
   </div>
 
-  <!-- RIGHT PANEL: QUESTIONS -->
   <div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <h2 style="font-size:1.15rem;font-weight:700;color:var(--primary-dark);">📚 সৃজনশীল প্রশ্নসমূহ</h2>
@@ -440,7 +432,6 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
 </div>
 </div>
 
-<!-- ═══ PREVIEW ═══ -->
 <div id="preview-tab" class="tab-content">
   <div id="preview-panel">
     <div class="preview-btn-bar">
@@ -491,9 +482,10 @@ function switchTab(t) {
 }
 
 /* ════════════════ COLUMN SELECT ════════════════ */
-function setColumns(n) {
+function setColumns(n, skipSave) {
   colCount = n;
   [1,2,3].forEach(i => document.getElementById('col-opt-'+i).classList.toggle('active', i===n));
+  if(!skipSave) autoSave();
 }
 
 /* ════════════════ GATHER LIVE TEXTAREA VALUES ════════════════ */
@@ -514,6 +506,67 @@ function gather() {
   });
 }
 
+/* ════════════════ AUTO SAVE & LOAD (BROWSER CACHE) ════════════════ */
+function autoSave() {
+  gather();
+  const examMeta = {
+    classroomName: document.getElementById('classroom-name').value,
+    examTitle: document.getElementById('exam-title').value,
+    chapter: document.getElementById('chapter').value,
+    chapterName: document.getElementById('chapter-name').value,
+    code1: document.getElementById('code1').value,
+    code2: document.getElementById('code2').value,
+    code3: document.getElementById('code3').value,
+    examTime: document.getElementById('exam-time').value,
+    totalMarks: document.getElementById('total-marks').value,
+    instructions: document.getElementById('instructions').value,
+    passMark: document.getElementById('pass-mark').value,
+    targetMark: document.getElementById('target-mark').value,
+    bannerMsg: document.getElementById('banner-msg').value,
+    footerMsg: document.getElementById('footer-msg').value,
+    colCount: colCount
+  };
+  localStorage.setItem('cached_questions', JSON.stringify(questions));
+  localStorage.setItem('cached_next_id', nextId);
+  localStorage.setItem('cached_exam_meta', JSON.stringify(examMeta));
+}
+
+function loadCache() {
+  const cachedQuestions = localStorage.getItem('cached_questions');
+  const cachedNextId = localStorage.getItem('cached_next_id');
+  const cachedMeta = localStorage.getItem('cached_exam_meta');
+
+  if (cachedQuestions) {
+    questions = JSON.parse(cachedQuestions);
+    nextId = parseInt(cachedNextId) || 1;
+  } else {
+    questions = [];
+    nextId = 1;
+  }
+
+  if (cachedMeta) {
+    const meta = JSON.parse(cachedMeta);
+    document.getElementById('classroom-name').value = meta.classroomName || '';
+    document.getElementById('exam-title').value = meta.examTitle || '';
+    document.getElementById('chapter').value = meta.chapter || '';
+    document.getElementById('chapter-name').value = meta.chapterName || '';
+    document.getElementById('code1').value = meta.code1 || '';
+    document.getElementById('code2').value = meta.code2 || '';
+    document.getElementById('code3').value = meta.code3 || '';
+    document.getElementById('exam-time').value = meta.examTime || '';
+    document.getElementById('total-marks').value = meta.totalMarks || '';
+    document.getElementById('instructions').value = meta.instructions || '';
+    document.getElementById('pass-mark').value = meta.passMark || '';
+    document.getElementById('target-mark').value = meta.targetMark || '';
+    document.getElementById('banner-msg').value = meta.bannerMsg || '';
+    document.getElementById('footer-msg').value = meta.footerMsg || '';
+    setColumns(meta.colCount || 2, true);
+  } else {
+    setColumns(2, true);
+  }
+  renderQs();
+}
+
 /* ════════════════ ADD QUESTION ════════════════ */
 function addQuestion(data) {
   const id = nextId++;
@@ -522,6 +575,7 @@ function addQuestion(data) {
     subQuestions: [{text:'',marks:1},{text:'',marks:2},{text:'',marks:3},{text:'',marks:4}]
   });
   renderQs();
+  autoSave();
   setTimeout(()=>document.getElementById('qcard-'+(nextId-1))?.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
 }
 
@@ -593,31 +647,33 @@ function subRowHTML(qid,si,sq){
 /* ════════════════ MUTATIONS ════════════════ */
 function onQChange(qid,field,val){
   const q=questions.find(q=>q.id===qid); if(q) q[field]=val;
+  autoSave();
 }
 function onSqChange(qid,si,field,val){
   const q=questions.find(q=>q.id===qid); if(!q||!q.subQuestions[si]) return;
   q.subQuestions[si][field]=field==='marks'?(parseInt(val)||0):val;
   if(field==='marks'){updateTotal();const b=document.getElementById('bdg-'+qid);if(b)b.textContent=qMark(q)+' মার্ক';}
+  autoSave();
 }
 function addSubQ(qid){
   const q=questions.find(q=>q.id===qid);
-  if(q&&q.subQuestions.length<4){ gather(); q.subQuestions.push({text:'',marks:DEF_MK[q.subQuestions.length]||0}); renderQs(); }
+  if(q&&q.subQuestions.length<4){ gather(); q.subQuestions.push({text:'',marks:DEF_MK[q.subQuestions.length]||0}); renderQs(); autoSave(); }
 }
 function removeSubQ(qid,si){
   const q=questions.find(q=>q.id===qid);
-  if(q){ gather(); q.subQuestions.splice(si,1); renderQs(); }
+  if(q){ gather(); q.subQuestions.splice(si,1); renderQs(); autoSave(); }
 }
 function removeQ(id){
-  if(confirm('এই প্রশ্নটি মুছে ফেলবেন?')){ gather(); questions=questions.filter(q=>q.id!==id); renderQs(); }
+  if(confirm('এই প্রশ্নটি মুছে ফেলবেন?')){ gather(); questions=questions.filter(q=>q.id!==id); renderQs(); autoSave(); }
 }
 function moveQ(id,dir){
   gather();
   const i=questions.findIndex(q=>q.id===id),ni=i+dir;
   if(ni<0||ni>=questions.length)return;
-  [questions[i],questions[ni]]=[questions[ni],questions[i]]; renderQs();
+  [questions[i],questions[ni]]=[questions[ni],questions[i]]; renderQs(); autoSave();
 }
 function clearAllQs(){
-  if(confirm('সব প্রশ্ন মুছে ফেলবেন?')){ questions=[]; renderQs(); }
+  if(confirm('সব প্রশ্ন মুছে ফেলবেন?')){ questions=[]; renderQs(); autoSave(); }
 }
 function updateTotal(){
   const t=questions.reduce((s,q)=>s+qMark(q),0);
@@ -674,7 +730,7 @@ function buildHTML(){
         <span style="font-weight:700;">পূর্ণমান— ${toBn(gv('total-marks'))}</span>
       </div>
     </div>
-    <p class="ep-instructions">দ্রষ্টব্যঃ ${gv('instructions')}</p>
+    <p class="ep-instructions">द्रष्टव्यঃ ${gv('instructions')}</p>
     ${passBox}
     <div class="ep-questions col-${colCount}" id="ep-qs">${qHTML}</div>
     <div class="ep-bottom-banner">${gv('footer-msg')}</div>`;
@@ -692,46 +748,17 @@ function printExam(){
   setTimeout(()=>window.print(), 700);
 }
 
-/* ════════════════ SAMPLE DATA ════════════════ */
-function loadSample(){
-  questions=[]; nextId=1;
-
-  questions.push({id:nextId++,title:'',
-    context:'বৃষ্টির দিনে মাহিন দেখল বৃষ্টি $3\\ kmh^{-1}$ বেগে লম্বভাবে পড়ছিল। সে আরও দেখল যে তুবা $2\\ kmh^{-1}$ বেগে হাঁটছিল এবং বর্ষা $4\\ kmh^{-1}$ বেগে দৌড়াচ্ছিল। তারা দুই জনেই উলম্বের সাথে ছাতা ভিন্ন কোণে ধরেছিল।',
-    subQuestions:[
-      {text:'শূন্য ভেক্টর কী?',marks:1},
-      {text:'$\\hat{i} \\times \\hat{i} = 0$ হয় কেন? ব্যাখ্যা কর।',marks:2},
-      {text:'তুবার সাপেক্ষে বৃষ্টির লব্ধি বেগ নির্ণয় কর।',marks:3},
-      {text:'তুবা এবং বর্ষার ছাতা ধরার কোণ কি একই? গাণিতিকভাবে ব্যাখ্যা দাও।',marks:4}
-    ]});
-
-  questions.push({id:nextId++,title:'',
-    context:'$10\\ km$ প্রস্থবিশিষ্ট একটি নদীতে স্রোতের বেগ $5\\ kmh^{-1}$। একজন মাঝি $10\\ kmh^{-1}$ বেগে স্রোতের সাথে $110°$ কোণে নদী পার হতে যাত্রা করল।',
-    subQuestions:[
-      {text:'একক ভেক্টর কাকে বলে?',marks:1},
-      {text:'লন রোলার টানা ও ঠেলার সুবিধা অসুবিধা ভেক্টর বিভাজনের সাহায্যে ব্যাখ্যা কর।',marks:2},
-      {text:'উদ্দীপকের মাঝির নদী পারাপারের সময় নির্ণয় কর।',marks:3},
-      {text:'সোজাসুজি অপর তীরে পৌঁছাতে মাঝি কী কী ব্যবস্থা গ্রহণ করতে পারে? গাণিতিক বিশ্লেষণ দাও।',marks:4}
-    ]});
-
-  questions.push({id:nextId++,title:'',
-    context:'ত্রিভুজের ৩টি শীর্ষবিন্দুর স্থানাঙ্ক $A(1,3,2)$, $B(2,-1,1)$ এবং $C(-1,2,3)$।',
-    subQuestions:[
-      {text:'কার্লের সংজ্ঞা দাও।',marks:1},
-      {text:'ঘর্ষণ বল অসংরক্ষণশীল বল — ব্যাখ্যা কর।',marks:2},
-      {text:'উদ্দীপকের ত্রিভুজের ক্ষেত্রফল নির্ণয় কর।',marks:3},
-      {text:'উপরের ৩টি ভেক্টর কি একই তলে? গাণিতিক বিশ্লেষণ দাও।',marks:4}
-    ]});
-
-  renderQs();
-}
-
 /* ════════════════ INIT ════════════════ */
 window.addEventListener('DOMContentLoaded', ()=>{
-  loadSample();
+  loadCache();
   // Render math in the reference card's live example
   setTimeout(()=>renderMath(document.querySelector('.card-body')), 300);
-  document.addEventListener('input', updateTotal);
+  
+  // Auto save on any form input activity
+  document.addEventListener('input', () => {
+    updateTotal();
+    autoSave();
+  });
 });
 </script>
 </body>
