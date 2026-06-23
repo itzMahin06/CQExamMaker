@@ -210,6 +210,16 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
 .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
 .empty-state .big { font-size: 3.5rem; }
 
+/* IMAGE UPLOAD UI */
+.image-upload-box {
+  margin-top: 8px; display: flex; align-items: center; gap: 10px;
+  background: #f8fafc; border: 1px dashed var(--border); padding: 8px; border-radius: 6px;
+}
+.thumb-preview {
+  max-height: 45px; max-width: 60px; border-radius: 4px; border: 1px solid var(--border);
+  object-fit: contain; background: #fff; display: none;
+}
+
 /* PREVIEW */
 #preview-panel { padding: 22px; }
 .preview-btn-bar { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
@@ -244,6 +254,11 @@ textarea.form-control { resize: vertical; min-height: 64px; line-height: 1.65; }
 .ep-q-body   { flex: 1; }
 .ep-q-title  { font-weight: 700; font-size: .86rem; margin-bottom: 3px; }
 .ep-context  { font-size: .83rem; text-align: justify; margin-bottom: 6px; }
+
+/* PRINT IMAGE SIZING */
+.ep-q-image-wrap { display: block; text-align: center; margin: 6px 0; break-inside: avoid; }
+.ep-q-image { max-height: 120px; max-width: 100%; object-fit: contain; border: 1px solid #ddd; padding: 2px; background: #fff; }
+
 .ep-sub-list { list-style: none; padding: 0; }
 .ep-sub-item { display: flex; gap: 6px; font-size: .82rem; line-height: 1.75; margin-bottom: 2px; }
 .ep-sub-lbl  { font-weight: 700; min-width: 20px; flex-shrink: 0; }
@@ -571,12 +586,46 @@ function loadCache() {
 function addQuestion(data) {
   const id = nextId++;
   questions.push(data ? {...data, id} : {
-    id, title:'', context:'',
+    id, title:'', context:'', image:'',
     subQuestions: [{text:'',marks:1},{text:'',marks:2},{text:'',marks:3},{text:'',marks:4}]
   });
   renderQs();
   autoSave();
   setTimeout(()=>document.getElementById('qcard-'+(nextId-1))?.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+
+/* ════════════════ IMAGE HANDLER ════════════════ */
+function handleImageUpload(el, qid) {
+  const file = el.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const q = questions.find(item => item.id === qid);
+    if (q) {
+      q.image = e.target.result;
+      // Update UI preview
+      const imgEl = document.getElementById('thumb-'+qid);
+      if (imgEl) {
+        imgEl.src = q.image;
+        imgEl.style.display = 'block';
+      }
+      autoSave();
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(qid) {
+  const q = questions.find(item => item.id === qid);
+  if (q) {
+    q.image = '';
+    const imgEl = document.getElementById('thumb-'+qid);
+    if (imgEl) imgEl.style.display = 'none';
+    const inputEl = document.getElementById('file-input-'+qid);
+    if (inputEl) inputEl.value = '';
+    autoSave();
+  }
 }
 
 /* ════════════════ RENDER QUESTION CARDS ════════════════ */
@@ -592,6 +641,9 @@ function renderQs() {
   questions.forEach((q,idx)=>{
     const el = document.createElement('div');
     el.className='question-card'; el.id='qcard-'+q.id;
+    
+    const hasImage = q.image ? true : false;
+
     el.innerHTML=`
       <div class="question-card-header">
         <div class="q-num">${toBn(idx+1)}</div>
@@ -607,7 +659,15 @@ function renderQs() {
           <textarea class="form-control ctx-ta" rows="3"
             placeholder="প্রেক্ষাপট লিখুন… যেমন: নদীতে স্রোতের বেগ $5\\ kmh^{-1}$"
             oninput="onQChange(${q.id},'context',this.value)">${escHTML(q.context)}</textarea>
+          
+          <div class="image-upload-box">
+            <input type="file" id="file-input-${q.id}" accept="image/*" style="display:none;" onchange="handleImageUpload(this, ${q.id})">
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('file-input-${q.id}').click()">🖼️ ছবি আপলোড</button>
+            <img id="thumb-${q.id}" class="thumb-preview" src="${q.image || ''}" style="display: ${hasImage?'block':'none'};">
+            ${hasImage ? `<button class="btn btn-danger btn-sm" style="padding:4px 8px; font-size:0.7rem;" onclick="removeImage(${q.id})">✕ মুছুন</button>` : ''}
+          </div>
         </div>
+        
         <label class="form-label" style="margin-bottom:7px;">উপ-প্রশ্নসমূহ</label>
         <div class="sub-questions" id="sqs-${q.id}">
           ${q.subQuestions.map((sq,si)=>subRowHTML(q.id,si,sq)).join('')}
@@ -693,6 +753,9 @@ function buildHTML(){
         <div class="ep-q-body">
           ${q.title?`<div class="ep-q-title">${q.title}</div>`:''}
           <div class="ep-context">${q.context||''}</div>
+          
+          ${q.image ? `<div class="ep-q-image-wrap"><img src="${q.image}" class="ep-q-image"></div>` : ''}
+          
           <ul class="ep-sub-list">
             ${q.subQuestions.map((sq,si)=>`
               <li class="ep-sub-item">
